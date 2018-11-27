@@ -1,10 +1,32 @@
 import React, {Component} from 'react';
 import {View, Text} from 'react-native';
+// for web, createSwitchNavigator must import from '@react-navigation/core',
+//  if import from 'react-navigation', following warning whill shown:
+//    client?cd17:157 ./node_modules/react-native-gesture-handler/GestureHandler.js
+//    Module not found: Error: Can't resolve './gestureHandlerRootHOC' in
+//    '/Users/chunghe/dev/mlive-web/node_modules/react-native-gesture-handler'
+import {SceneView, SwitchRouter, createNavigator} from '@react-navigation/core';
+import {Link, createBrowserApp} from '@react-navigation/web';
 import logo from './logo.svg';
 import './App.css';
 import {Svg, Rect, Circle, Path} from 'react-native-svg';
 
-class App extends Component {
+class MainView extends React.Component {
+  render() {
+    const {descriptors, navigation} = this.props;
+    const activeKey = navigation.state.routes[navigation.state.index].key;
+    const descriptor = descriptors[activeKey];
+
+    return (
+      <SceneView
+        component={descriptor.getComponent()}
+        navigation={descriptor.navigation}
+      />
+    );
+  }
+}
+
+class HomeScreen extends Component {
   render() {
     return (
       <div className="App">
@@ -23,6 +45,8 @@ class App extends Component {
           <p>
             Edit <code>src/App.js</code> and save to reload.
           </p>
+          <Link routeName="Detail">go to detail page</Link>
+
           <a
             className="App-link"
             href="https://reactjs.org"
@@ -36,4 +60,33 @@ class App extends Component {
   }
 }
 
-export default App;
+HomeScreen.path = '';
+
+class DetailScreen extends Component {
+  render() {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#ececec',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <Text style={{fontSize: 48}}>Welcome detail page</Text>
+      </View>
+    );
+  }
+}
+
+DetailScreen.path = 'detail';
+
+const RootStack = createNavigator(
+  MainView,
+  SwitchRouter({
+    Home: HomeScreen,
+    Detail: DetailScreen,
+  }),
+  {},
+);
+
+export default createBrowserApp(RootStack);
